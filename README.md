@@ -65,10 +65,14 @@ services:
   traefik-forward-auth:
     image: thomseddon/traefik-forward-auth:2
     environment:
-      - CLIENT_ID=your-client-id
-      - CLIENT_SECRET=your-client-secret
-      - SECRET=something-random
-      - INSECURE_COOKIE=true # Example assumes no https, do not use in production
+      COOKIE_DOMAIN: mycompany.com
+      PROVIDERS_OAUTH2_CLIENT_ID: <gitlab application id>
+      PROVIDERS_OAUTH2_CLIENT_SECRET: <gitlab application secret>
+      PROVIDERS_OAUTH2_LOGIN_URL: https://<gitlab host>/oauth/authorize
+      PROVIDERS_OAUTH2_SCOPE: read_user
+      PROVIDERS_OAUTH2_TOKEN_URL: https://<gitlab host>/oauth/token
+      PROVIDERS_OAUTH2_USER_URL: https://<gitlab host>/api/v4/user
+      SECRET: <something random>
 
   whoami:
     image: emilevauge/whoami:latest

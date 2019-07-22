@@ -88,7 +88,7 @@ func GetLoginURL(r *http.Request, nonce string) string {
 	state := fmt.Sprintf("%s:%s", nonce, returnUrl(r))
 
 	// TODO: Support multiple providers
-	return config.Providers.Google.GetLoginURL(redirectUri(r), state)
+	return config.Providers.OAuth2.GetLoginURL(redirectUri(r), state)
 }
 
 // Exchange code for token
@@ -97,14 +97,14 @@ func ExchangeCode(r *http.Request) (string, error) {
 	code := r.URL.Query().Get("code")
 
 	// TODO: Support multiple providers
-	return config.Providers.Google.ExchangeCode(redirectUri(r), code)
+	return config.Providers.OAuth2.ExchangeCode(redirectUri(r), code)
 }
 
 // Get user with token
 
 func GetUser(token string) (provider.User, error) {
 	// TODO: Support multiple providers
-	return config.Providers.Google.GetUser(token)
+	return config.Providers.OAuth2.GetUser(token)
 }
 
 // Utility methods

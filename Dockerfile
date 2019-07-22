@@ -13,6 +13,7 @@ RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -installsuffix nocgo -o 
 
 # Copy into scratch container
 FROM scratch
+EXPOSE 4181
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /traefik-forward-auth ./
 ENTRYPOINT ["./traefik-forward-auth"]

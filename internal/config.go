@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"regexp"
 	"strconv"
@@ -48,9 +47,9 @@ type Config struct {
 	CookieDomainsLegacy CookieDomains `long:"cookie-domains" env:"COOKIE_DOMAINS" description:"DEPRECATED - Use \"cookie-domain\""`
 	CookieSecretLegacy  string        `long:"cookie-secret" env:"COOKIE_SECRET" description:"DEPRECATED - Use \"secret\""  json:"-"`
 	CookieSecureLegacy  string        `long:"cookie-secure" env:"COOKIE_SECURE" description:"DEPRECATED - Use \"insecure-cookie\""`
-	ClientIdLegacy      string        `long:"client-id" env:"CLIENT_ID" group:"DEPs" description:"DEPRECATED - Use \"providers.google.client-id\""`
-	ClientSecretLegacy  string        `long:"client-secret" env:"CLIENT_SECRET" description:"DEPRECATED - Use \"providers.google.client-id\""  json:"-"`
-	PromptLegacy        string        `long:"prompt" env:"PROMPT" description:"DEPRECATED - Use \"providers.google.prompt\""`
+	ClientIdLegacy      string        `long:"client-id" env:"CLIENT_ID" group:"DEPs" description:"DEPRECATED - Use \"providers.oauth2.client-id\""`
+	ClientSecretLegacy  string        `long:"client-secret" env:"CLIENT_SECRET" description:"DEPRECATED - Use \"providers.oauth2.client-id\""  json:"-"`
+	PromptLegacy        string        `long:"prompt" env:"PROMPT" description:"DEPRECATED - Use \"providers.oauth2.prompt\""`
 }
 
 func NewGlobalConfig() Config {
@@ -65,29 +64,7 @@ func NewGlobalConfig() Config {
 }
 
 func NewConfig(args []string) (Config, error) {
-	c := Config{
-		Rules: map[string]*Rule{},
-		Providers: provider.Providers{
-			Google: provider.Google{
-				Scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
-				LoginURL: &url.URL{
-					Scheme: "https",
-					Host:   "accounts.google.com",
-					Path:   "/o/oauth2/auth",
-				},
-				TokenURL: &url.URL{
-					Scheme: "https",
-					Host:   "www.googleapis.com",
-					Path:   "/oauth2/v3/token",
-				},
-				UserURL: &url.URL{
-					Scheme: "https",
-					Host:   "www.googleapis.com",
-					Path:   "/oauth2/v2/userinfo",
-				},
-			},
-		},
-	}
+	c := Config{}
 
 	err := c.parseFlags(args)
 	if err != nil {
@@ -103,14 +80,14 @@ func NewConfig(args []string) (Config, error) {
 		c.SecretString = c.CookieSecretLegacy
 	}
 	if c.ClientIdLegacy != "" {
-		c.Providers.Google.ClientId = c.ClientIdLegacy
+		c.Providers.OAuth2.ClientId = c.ClientIdLegacy
 	}
 	if c.ClientSecretLegacy != "" {
-		c.Providers.Google.ClientSecret = c.ClientSecretLegacy
+		c.Providers.OAuth2.ClientSecret = c.ClientSecretLegacy
 	}
 	if c.PromptLegacy != "" {
-		fmt.Println("prompt config option is deprecated, please use providers.google.prompt")
-		c.Providers.Google.Prompt = c.PromptLegacy
+		fmt.Println("prompt config option is deprecated, please use providers.oauth.prompt")
+		c.Providers.OAuth2.Prompt = c.PromptLegacy
 	}
 	if c.CookieSecureLegacy != "" {
 		fmt.Println("cookie-secure config option is deprecated, please use insecure-cookie")
@@ -250,8 +227,8 @@ func (c *Config) Validate() {
 		log.Fatal("\"secret\" option must be set.")
 	}
 
-	if c.Providers.Google.ClientId == "" || c.Providers.Google.ClientSecret == "" {
-		log.Fatal("providers.google.client-id, providers.google.client-secret must be set")
+	if c.Providers.OAuth2.ClientId == "" || c.Providers.OAuth2.ClientSecret == "" {
+		log.Fatal("providers.oauth2.client-id, providers.oauth2.client-secret must be set")
 	}
 
 	// Check rules
@@ -274,7 +251,7 @@ type Rule struct {
 func NewRule() *Rule {
 	return &Rule{
 		Action:   "auth",
-		Provider: "google", // TODO: Use default provider
+		Provider: "oauth2", // TODO: Use default provider
 	}
 }
 
@@ -290,8 +267,8 @@ func (r *Rule) Validate() {
 	}
 
 	// TODO: Update with more provider support
-	if r.Provider != "google" {
-		log.Fatal("invalid rule provider, must be \"google\"")
+	if r.Provider != "oauth2" {
+		log.Fatal("invalid rule provider, must be \"oauth2\"")
 	}
 }
 

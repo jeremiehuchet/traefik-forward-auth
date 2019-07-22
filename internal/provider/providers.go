@@ -2,6 +2,7 @@ package provider
 
 type Providers struct {
 	Google Google `group:"Google Provider" namespace:"google" env-namespace:"GOOGLE"`
+	OAuth2 OAuth2 `group:"OAuth2 Provider" namespace:"oauth2" env-namespace:"OAUTH2"`
 }
 
 type Token struct {
@@ -9,8 +10,5 @@ type Token struct {
 }
 
 type User struct {
-	Id       string `json:"id"`
-	Email    string `json:"email"`
-	Verified bool   `json:"verified_email"`
-	Hd       string `json:"hd"`
+	Email string `json:"email"`
 }
